@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using CoreNodeModels.Input;
 using Dynamo.Graph.Nodes.ZeroTouch;
 using Dynamo.Graph.Workspaces;
 using Dynamo.Properties;
@@ -329,6 +331,17 @@ namespace Dynamo.Tests
 
             // Assert scale factor did not got reset after workspace clear
             Assert.AreEqual(this.CurrentDynamoModel.CurrentWorkspace.ScaleFactor, 10000);
+        }
+        [Test]
+        public void MarsGraphOpenTimeTest_CategoryCacheFunctionDescriptor()
+        {
+            var sw = new Stopwatch();
+            var examplePath = Path.Combine(TestDirectory, "performance", "large_graphs", "Autodesk-MaRS-office-example-v3.dyn");
+            sw.Start();
+            OpenModel(examplePath);
+            sw.Stop();
+            Console.WriteLine($"Mars graph total nodes: {CurrentDynamoModel.CurrentWorkspace.Nodes.Count()}");
+            Console.WriteLine($"Mars graph open time: {sw.ElapsedMilliseconds} ms");
         }
     }
 }

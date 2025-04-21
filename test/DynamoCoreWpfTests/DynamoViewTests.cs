@@ -16,6 +16,7 @@ using Dynamo.ViewModels;
 using Dynamo.Wpf.Controls;
 using Dynamo.Wpf.ViewModels.Core;
 using Dynamo.Wpf.Views;
+using DynamoCoreWpfTests.Utility;
 using NUnit.Framework;
 
 
@@ -30,6 +31,18 @@ namespace DynamoCoreWpfTests
             libraries.Add("FunctionObject.ds");
             libraries.Add("BuiltIn.ds");
             libraries.Add("FFITarget.dll");
+        }
+        [Test]
+        public void MarsGraphOpenTimeTest_CategoryCacheFunctionDescriptor()
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            var examplePath = Path.Combine("performance", "large_graphs", "Autodesk-MaRS-office-example-v3.dyn");
+            Open(examplePath);
+            DispatcherUtil.DoEvents();
+            sw.Stop();
+            Console.WriteLine($"Mars graph total nodes: {ViewModel.Model.CurrentWorkspace.Nodes.Count()}");
+            Console.WriteLine($"Mars graph open time: {sw.ElapsedMilliseconds} ms");
         }
 
         [Test]
