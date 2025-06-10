@@ -26,9 +26,14 @@ set harvestPath=%2
 set releasePath=%2
 
 :build
+:: Check if DynamoCore.dll exists before extracting version
+if not exist "%harvestPath%\DynamoCore.dll" (
+  echo ERROR: "%harvestPath%\DynamoCore.dll" not found. Please check your build output path.
+  exit /b 1
+)
 :: Get version string from "DynamoCore.dll"
 set count=1
-for /f %%f in ('cscript //Nologo ..\install\GetFileVersion.vbs %harvestPath%\DynamoCore.dll') do (
+for /f %%f in ('cscript //Nologo "%~dp0..\install\GetFileVersion.vbs" "%harvestPath%\DynamoCore.dll"') do (
   setlocal EnableDelayedExpansion
   if !count!==1 set Major=%%f
   if !count!==2 set Minor=%%f
