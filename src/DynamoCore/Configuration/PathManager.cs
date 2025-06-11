@@ -19,14 +19,14 @@ namespace Dynamo.Core
     {
         /// <summary>
         /// Major version number to be used to form various data file paths.
-        /// If both this and MinorFileVersion are 0, then version information 
+        /// If both this and MinorFileVersion are 0, then version information
         /// is retrieved from DynamoCore.dll.
         /// </summary>
         internal int MajorFileVersion { get; set; }
 
         /// <summary>
         /// Minor version number to be used to form various data file paths.
-        /// If both this and MajorFileVersion are 0, then version information 
+        /// If both this and MajorFileVersion are 0, then version information
         /// is retrieved from DynamoCore.dll.
         /// </summary>
         internal int MinorFileVersion { get;set; }
@@ -42,7 +42,7 @@ namespace Dynamo.Core
         internal string HostPath { get; set; }
 
         /// <summary>
-        /// Reference of an IPathResolver object that supplies 
+        /// Reference of an IPathResolver object that supplies
         /// additional path information. This argument is optional.
         /// </summary>
         internal IPathResolver PathResolver { get; set; }
@@ -112,10 +112,10 @@ namespace Dynamo.Core
 
         private IEnumerable<string> RootDirectories
         {
-            get 
-            { 
-                return Preferences != null ? 
-                    Preferences.CustomPackageFolders.Select(path => path == DynamoModel.BuiltInPackagesToken ? BuiltinPackagesDirectory : path) 
+            get
+            {
+                return Preferences != null ?
+                    Preferences.CustomPackageFolders.Select(path => path == DynamoModel.BuiltInPackagesToken ? BuiltinPackagesDirectory : path)
                     : rootDirectories;
             }
         }
@@ -181,13 +181,13 @@ namespace Dynamo.Core
 
         public string DefaultUserDefinitions
         {
-            get 
+            get
             {
                 if (Preferences is PreferenceSettings preferences)
                 {
                     return TransformPath(preferences.SelectedPackagePathForInstall, DefinitionsDirectoryName);
                 }
-                return TransformPath(RootDirectories.First(), DefinitionsDirectoryName); 
+                return TransformPath(RootDirectories.First(), DefinitionsDirectoryName);
             }
         }
 
@@ -207,7 +207,7 @@ namespace Dynamo.Core
         }
 
         /// <summary>
-        /// The enum will contain the possible values for Preference Item 
+        /// The enum will contain the possible values for Preference Item
         /// </summary>
         public enum PreferenceItem
         {
@@ -326,7 +326,7 @@ namespace Dynamo.Core
                 if (!Directory.Exists(path))
                 {
                     throw new Exception(String.Format(Resources.DirectoryNotFound, path));
-                }                 
+                }
                 additionalResolutionPaths.Add(path);
             }
         }
@@ -334,18 +334,18 @@ namespace Dynamo.Core
         /// <summary>
         /// Given an initial file path with the file name, resolve the full path
         /// to the target file. The search happens in the following order:
-        /// 
-        /// 1. If the provided file path is valid and points to an existing file, 
+        ///
+        /// 1. If the provided file path is valid and points to an existing file,
         ///    the file path is return as-is.
         /// 2. The file is searched alongside DynamoCore.dll for a match.
         /// 3. The file is searched within AdditionalResolutionPaths.
         /// 4. The search is left to system path resolution.
-        /// 
+        ///
         /// </summary>
         /// <param name="library">The initial library file path.</param>
         /// <returns>Returns true if the requested file can be located, or false
         /// otherwise.</returns>
-        /// 
+        ///
         public bool ResolveLibraryPath(ref string library)
         {
             if (PathHelper.IsValidPath(library)) // Absolute path, we're done here.
@@ -405,10 +405,10 @@ namespace Dynamo.Core
         /// <summary>
         /// Constructs an instance of PathManager object.
         /// </summary>
-        /// <param name="pathManagerParams">Parameters to configure the new 
-        /// instance of PathManager. See PathManagerParams for details of each 
+        /// <param name="pathManagerParams">Parameters to configure the new
+        /// instance of PathManager. See PathManagerParams for details of each
         /// field.</param>
-        /// 
+        ///
         internal PathManager(PathManagerParams pathManagerParams)
         {
             var corePath = pathManagerParams.CorePath;
@@ -416,18 +416,24 @@ namespace Dynamo.Core
 
             if (string.IsNullOrEmpty(corePath) || !Directory.Exists(corePath))
             {
-                // If the caller does not provide an alternative core path, 
+
+
+#if WASM
+                corePath = AppContext.BaseDirectory;
+
+#else
+                // If the caller does not provide an alternative core path,
                 // use the default folder in which DynamoCore.dll resides.
                 var dynamoCorePath = Assembly.GetExecutingAssembly().Location;
                 corePath = Path.GetDirectoryName(dynamoCorePath);
+#endif
             }
-
             dynamoCoreDir = corePath;
 
             var assemblyPath = Path.Combine(dynamoCoreDir, "DynamoCore.dll");
             if (!PathHelper.IsValidPath(assemblyPath))
             {
-                throw new Exception("Dynamo's core path could not be found. " +
+                throw new Exception($"Dynamo's core path {assemblyPath} could not be found. " +
                     "If you are running Dynamo from a test, try specifying the " +
                     "Dynamo core location in the DynamoBasePath variable in " +
                     "TestServices.dll.config.");
@@ -457,11 +463,11 @@ namespace Dynamo.Core
         }
 
         /// <summary>
-        /// Call this method to force PathManager to create folders that it 
-        /// is referring to. This method call throws exception if any creation 
+        /// Call this method to force PathManager to create folders that it
+        /// is referring to. This method call throws exception if any creation
         /// fails.
         /// </summary>
-        /// <param name="exceptions">The output list of exception, if any of 
+        /// <param name="exceptions">The output list of exception, if any of
         /// the target directories cannot be created during this call.</param>
         internal void EnsureDirectoryExistence(List<Exception> exceptions)
         {
@@ -693,7 +699,7 @@ namespace Dynamo.Core
             return Path.Combine(folder,
                 String.Format("{0}.{1}", majorFileVersion, minorFileVersion));
         }
-        
+
         // This method is used to get the locations of packages folder or custom
         // nodes folder given the root path. This is necessary because the packages
         // may be in the root folder or in a packages subfolder of the root folder.
@@ -736,10 +742,10 @@ namespace Dynamo.Core
             var uiCulture = CultureInfo.CurrentUICulture.Name;
             var sampleDirectory = Path.Combine(dataRootDirectory, SamplesDirectoryName, uiCulture);
 
-            // If the localized samples directory does not exist then fall back 
-            // to using the en-US samples folder. Do an additional check to see 
+            // If the localized samples directory does not exist then fall back
+            // to using the en-US samples folder. Do an additional check to see
             // if the localized folder is available but is empty.
-            // 
+            //
             var di = new DirectoryInfo(sampleDirectory);
             if (!Directory.Exists(sampleDirectory) ||
                 !di.GetDirectories().Any() ||
@@ -780,10 +786,10 @@ namespace Dynamo.Core
             var uiCulture = CultureInfo.CurrentUICulture.Name;
             var templateDirectory = Path.Combine(dataRootDirectory, TemplateDirectoryName, uiCulture);
 
-            // If the localized template directory does not exist then fall back 
-            // to using the en-US template folder. Do an additional check to see 
+            // If the localized template directory does not exist then fall back
+            // to using the en-US template folder. Do an additional check to see
             // if the localized folder is available but is empty.
-            // 
+            //
             var di = new DirectoryInfo(templateDirectory);
             if (!Directory.Exists(templateDirectory) ||
                 !di.GetDirectories().Any() ||

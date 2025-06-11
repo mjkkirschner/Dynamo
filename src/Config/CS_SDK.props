@@ -13,7 +13,7 @@
     <TargetFramework>$(DotNet)</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath> 
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath Condition=" '$(OutputPath)' == '' ">$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutputPath>
     <NunitPath Condition=" '$(NunitPath)' == '' ">$(SolutionDir)..\extern\NUnit</NunitPath>
     <SharpDXDirectXVersion>DirectX11</SharpDXDirectXVersion>
@@ -156,4 +156,7 @@
           </PropertyGroup>
       </Otherwise>
   </Choose>
+  <PropertyGroup Condition=" '$(TargetFramework)' != '' and $(TargetFramework.Contains('browser')) ">
+    <DefineConstants>$(DefineConstants);WASM</DefineConstants>
+  </PropertyGroup>
 </Project>

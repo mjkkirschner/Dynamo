@@ -42,7 +42,7 @@ for /f %%f in ('cscript //Nologo "%~dp0..\install\GetFileVersion.vbs" "%harvestP
   set /a count=!count!+1
 )
 setlocal DisableDelayedExpansion
-set version=%Major%.%Minor%.%Build%-beta%Revision%
+set version=%Major%.%Minor%.%Build%.%Revision%
 
 for /f %%i in ('git rev-parse HEAD') do set COMMIT=%%i
 

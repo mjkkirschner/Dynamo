@@ -8,10 +8,25 @@ param(
     [string]$LocalNugetRepo = "C:\nuget_local"
 )
 
-# 1. Build DynamoCore.sln in Debug for Publish_Linux platform using dotnet
-Write-Host "Building DynamoCore.sln in Debug mode for Publish_Linux platform using dotnet..."
+# 0. Ensure dotnet-t4 is installed and generate AssemblySharedInfo.cs from the .tt file
+Write-Host "Setting up dotnet-t4 and generating AssemblySharedInfo.cs..."
+$workspaceRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..') | Select-Object -ExpandProperty Path
+$ttFolder = Join-Path $workspaceRoot 'src\AssemblySharedInfoGenerator'
+Push-Location $ttFolder
+if (!(Test-Path ".config")) {
+    dotnet new tool-manifest
+}
+dotnet tool install --local dotnet-t4 --version 2.3.1
+# Generate AssemblySharedInfo.cs from the .tt file
+$ttFile = Join-Path $ttFolder 'AssemblySharedInfo.tt'
+$outFile = Join-Path $ttFolder 'AssemblySharedInfo.cs'
+dotnet tool run t4 "$ttFile" --out="$outFile"
+Pop-Location
+
+# 1. Build DynamoCore.sln in Debug for Publish_Linux platform using dotnet, overriding DotNet to net8.0-browser
+Write-Host "Building DynamoCore.sln in Debug mode for Publish_Linux platform using dotnet (DotNet=net8.0-browser)..."
 $solutionPath = Join-Path $PSScriptRoot '..\..\..\src\DynamoCore.sln'
-dotnet build $solutionPath --configuration Debug -p:Platform=Publish_Linux
+dotnet build $solutionPath --configuration Debug -p:Platform=Publish_Linux -p:DotNet=net8.0-browser
 if ($LASTEXITCODE -ne 0) {
     Write-Error "dotnet build failed. Exiting."
     exit 1
