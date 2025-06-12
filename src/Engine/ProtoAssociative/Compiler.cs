@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ProtoCore;
@@ -37,7 +38,7 @@ namespace ProtoAssociative
                         }
                         else
                         {
-                            // We reuse the existing toplevel CodeBlockList's for the procedureTable's 
+                            // We reuse the existing toplevel CodeBlockList's for the procedureTable's
                             // by calling this overloaded constructor - pratapa
                             core.assocCodegen = new ProtoAssociative.CodeGen(core);
                         }
@@ -66,7 +67,7 @@ namespace ProtoAssociative
                     }
                     else
                     {
-                        //if codeBlockNode is not null, Compile has been called from DfsTraverse. No parsing is needed. 
+                        //if codeBlockNode is not null, Compile has been called from DfsTraverse. No parsing is needed.
                         if (!core.builtInsLoaded)
                         {
                             // Load the built-in methods manually
@@ -103,10 +104,10 @@ namespace ProtoAssociative
                     }
                 }
 
-                // @keyu: we have to restore asscoCodegen here. It may be 
-                // reused later on. Suppose for an inline expression 
+                // @keyu: we have to restore asscoCodegen here. It may be
+                // reused later on. Suppose for an inline expression
                 // "x = 1 == 2 ? 3 : 4", we dynamically create assocCodegen
-                // to compile true and false expression in this inline 
+                // to compile true and false expression in this inline
                 // expression, and if we don't restore assocCodegen, the pc
                 // is totally messed up.
                 //
@@ -119,8 +120,11 @@ namespace ProtoAssociative
                     core.assocCodegen = oldCodegen;
                 }
             }
-            catch (ProtoCore.BuildHaltException)
+            catch (ProtoCore.BuildHaltException ex)
             {
+                Console.WriteLine($"{langBlock} - build halted: {ex.Message}");
+                Console.WriteLine("associative compiler caught a build halt exception: {0}", ex.Message);
+                Console.WriteLine(ex);
             }
 
             buildSucceeded = core.BuildStatus.BuildSucceeded;

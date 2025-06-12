@@ -16,7 +16,7 @@ namespace ProtoCore.Utils
 {
     /* Variable Line Struct
      * Used to present the pair value of Line number and Variable Name.
-     * 
+     *
      * @variable    : string, name of the variable refered to
      * @line        : int, line number of the variable in the code block
      */
@@ -103,7 +103,7 @@ namespace ProtoCore.Utils
         private List<AssociativeNode> commentNodes;
         private List<BuildData.ErrorEntry> errors;
         private List<BuildData.WarningEntry> warnings;
-        
+
         public ParseParam(System.Guid postfixGuid, System.String code, ElementResolver elementResolver)
         {
             this.PostfixGuid = postfixGuid;
@@ -255,7 +255,7 @@ namespace ProtoCore.Utils
 
             int blockId;
             string importStatement = @"import (""" + ToLiteral(assemblyPath) + @""");";
-
+            Console.WriteLine(importStatement);
             core.ResetForPrecompilation();
             var status = PreCompile(importStatement, core, null, out blockId);
 
@@ -266,7 +266,7 @@ namespace ProtoCore.Utils
         }
 
         /// <summary>
-        /// Pre-compiles DS code in code block node, 
+        /// Pre-compiles DS code in code block node,
         /// checks for syntax, converts non-assignments to assignments,
         /// stores list of AST nodes, errors and warnings
         /// Evaluates and stores list of unbound identifiers
@@ -289,7 +289,7 @@ namespace ProtoCore.Utils
                 return false;
             }
 
-            // Catch the syntax errors and errors for unsupported 
+            // Catch the syntax errors and errors for unsupported
             // language constructs thrown by compile expression
             parseParams.AppendWarnings(core.BuildStatus.Warnings);
             var warnings = Check(astNodes);
@@ -298,7 +298,7 @@ namespace ProtoCore.Utils
             parseParams.AppendParsedNodes(astNodes.Where(n => !n.skipMe));
             parseParams.AppendComments(comments);
 
-            // Compile the code to get the resultant unboundidentifiers  
+            // Compile the code to get the resultant unboundidentifiers
             // and any errors or warnings that were caught by the compiler and cache them in parseParams
             return CompileCodeBlockAST(core, parseParams, priorNames);
         }
@@ -311,7 +311,7 @@ namespace ProtoCore.Utils
             try
             {
                 int blockId = Constants.kInvalidIndex;
-                
+
 
                 bool parsingPreloadFlag = core.IsParsingPreloadedAssembly;
                 bool parsingCbnFlag = core.IsParsingCodeBlockNode;
@@ -320,11 +320,11 @@ namespace ProtoCore.Utils
 
                 core.ResetForPrecompilation();
 
-                // Lookup namespace resolution map in elementResolver to rewrite 
+                // Lookup namespace resolution map in elementResolver to rewrite
                 // partial classnames with their fully qualified names in ASTs
-                // before passing them for pre-compilation. If partial class is not found in map, 
+                // before passing them for pre-compilation. If partial class is not found in map,
                 // update Resolution map in elementResolver with fully resolved name from compiler.
-                var reWrittenNodes = ElementRewriter.RewriteElementNames(core.ClassTable,  
+                var reWrittenNodes = ElementRewriter.RewriteElementNames(core.ClassTable,
                     parseParams.ElementResolver, parseParams.ParsedNodes, core.BuildStatus.LogSymbolConflictWarning);
 
                 if (priorNames != null)
@@ -464,7 +464,7 @@ namespace ProtoCore.Utils
                             astNodes.Add(newNode);
                             index++;
                         }
-                        
+
                     }
                 }
             }
@@ -482,7 +482,7 @@ namespace ProtoCore.Utils
             int stmtNumber = 1;
             foreach (var node in astNodes)
             {
-                // Only binary expression need warnings. 
+                // Only binary expression need warnings.
                 // Function definition nodes do not have input and output ports
                 var bNode = node as BinaryExpressionNode;
                 if (bNode != null)
@@ -604,7 +604,7 @@ namespace ProtoCore.Utils
                         fNode.FunctionBody.Body.Clear();
                         fNode.FunctionBody.Body.AddRange(body.Where(n => !n.skipMe));
                     }
-                    
+
                     continue;
                 }
 
@@ -639,7 +639,7 @@ namespace ProtoCore.Utils
                     }
                     bnode.RightNode.Accept(finder);
 
-                    if (finder.Found) 
+                    if (finder.Found)
                     {
                         warnings.Add(new WarningEntry
                         {

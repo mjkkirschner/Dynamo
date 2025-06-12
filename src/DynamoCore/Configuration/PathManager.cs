@@ -29,7 +29,7 @@ namespace Dynamo.Core
         /// If both this and MajorFileVersion are 0, then version information
         /// is retrieved from DynamoCore.dll.
         /// </summary>
-        internal int MinorFileVersion { get;set; }
+        internal int MinorFileVersion { get; set; }
 
         /// <summary>
         /// The full path of the directory that contains DynamoCore.dll.
@@ -48,6 +48,8 @@ namespace Dynamo.Core
         internal IPathResolver PathResolver { get; set; }
     }
 
+    //TODO can this be injected into the dynamo model startup?
+    //IE can hosts implement their own IPathManager?
     internal class PathManager : IPathManager
     {
         internal static Lazy<PathManager>
@@ -135,7 +137,11 @@ namespace Dynamo.Core
             {
                 if (builtinPackagesDirectory == null)
                 {
+#if WASM
+                    builtinPackagesDirectory = Path.Combine(AppContext.BaseDirectory, builtinPackagesDirName, @"Packages");
+#else
                     builtinPackagesDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetAssembly(typeof(PathManager)).Location), builtinPackagesDirName, @"Packages");
+#endif
                 }
                 return builtinPackagesDirectory;
             }
@@ -452,11 +458,19 @@ namespace Dynamo.Core
             minorFileVersion = pathManagerParams.MinorFileVersion;
             if (majorFileVersion == 0 && (minorFileVersion == 0))
             {
+
+#if WASM
+                var v = Assembly.GetExecutingAssembly().GetName().Version;
+                majorFileVersion = v.Major;
+                minorFileVersion = v.Minor;
+#else
+
                 var v = FileVersionInfo.GetVersionInfo(assemblyPath);
                 majorFileVersion = v.FileMajorPart;
                 minorFileVersion = v.FileMinorPart;
-            }
 
+#endif
+            }
             BuildUserSpecificDirectories();
             BuildCommonDirectories();
             LoadPathsFromResolver();

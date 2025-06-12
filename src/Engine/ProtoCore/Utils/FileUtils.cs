@@ -8,19 +8,19 @@ namespace ProtoCore.Utils
     {
         private static string mInstallPath;
         /// <summary>
-        /// Locates the given file from the search path options and gets the 
+        /// Locates the given file from the search path options and gets the
         /// full file path.
         /// </summary>
         /// <param name="fileName">Name of the file to locate</param>
-        /// <param name="options">Options structure for search path, if options 
+        /// <param name="options">Options structure for search path, if options
         /// is null it will search only in the executing assembly path or the
         /// current directory.</param>
-        /// <returns>Full path for the file if located successfully else the 
+        /// <returns>Full path for the file if located successfully else the
         /// file name when failed to locate the given file</returns>
         public static string GetDSFullPathName(string fileName, Options options = null)
         {
             // trim white space chars
-            var trimChars = new[] {'\n','\t','\r',' '};
+            var trimChars = new[] { '\n', '\t', '\r', ' ' };
             fileName = fileName.Trim(trimChars);
 
             // Fix file paths which include an apostrophe
@@ -43,7 +43,7 @@ namespace ProtoCore.Utils
 
             //2. Search relative to the .ds file directory
             string rootModulePath = ".";
-            if (null!=options && !string.IsNullOrEmpty(options.RootModulePathName))
+            if (null != options && !string.IsNullOrEmpty(options.RootModulePathName))
                 rootModulePath = options.RootModulePathName;
 
             if (GetFullPath(fileName, rootModulePath, out fullPathName))
@@ -108,8 +108,16 @@ namespace ProtoCore.Utils
             if (string.IsNullOrEmpty(mInstallPath))
             {
                 var protoCore = Assembly.GetExecutingAssembly();
+
+                #if WASM
+                var protocorePath = Directory.GetFiles(AppContext.BaseDirectory, Assembly.GetExecutingAssembly().GetName().Name + ".dll",
+                    SearchOption.AllDirectories).FirstOrDefault();
+                Console.WriteLine($"ProtoCore assembly path: {protocorePath}");
+                mInstallPath = Path.GetDirectoryName(protocorePath);
+                #else
                 var uri = new UriBuilder(protoCore.CodeBase);
                 mInstallPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
+                #endif
             }
 
             return mInstallPath;

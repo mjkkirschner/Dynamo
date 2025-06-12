@@ -25,7 +25,11 @@ namespace Dynamo.Scheduler
                 CurrentUICulture = Thread.CurrentThread.CurrentUICulture
             };
 
+            //TODO it seems like there is no reason to start this thread if we are using TaskProcessMode.sync,
+            //even if we are not in wasm.
+#if !WASM
             internalThread.Start();
+            #endif
         }
 
         /// <summary>
