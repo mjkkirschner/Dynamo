@@ -12,7 +12,7 @@ namespace Dynamo.Extensions
     /// Provides functionality for loading Dynamo's extensions.
     /// This class loads formatted XMLs which contain information about
     /// *Extension.dll and type name of IExtension inheritor.
-    /// 
+    ///
     /// Example:
     /// <ExtensionDefinition>
     ///   <AssemblyPath>..\ExtensionName.dll</AssemblyPath>
@@ -30,10 +30,10 @@ namespace Dynamo.Extensions
                     CertificateVerification.CheckAssemblyForValidCertificate(extension.AssemblyPath);
                 }
 
-                var assembly = Assembly.LoadFrom(extension.AssemblyPath);
+                var assembly = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(extension.AssemblyPath);
                 var result = assembly.CreateInstance(extension.TypeName) as IExtension;
                 ExtensionLoading?.Invoke(result);
-                
+
                 Logging.Analytics.TrackEvent(
                 Actions.Load,
                 Categories.ExtensionOperations, extension.TypeName);
@@ -148,7 +148,7 @@ namespace Dynamo.Extensions
 
         /// <summary>
         /// A list of root directories which require extensions to have a signed entry point
-        /// File path locations from package definition xml's are validated against this collection 
+        /// File path locations from package definition xml's are validated against this collection
         /// </summary>
         internal List<string> DirectoriesToVerifyCertificates = new List<string>();
 

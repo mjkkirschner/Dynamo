@@ -20,7 +20,7 @@ namespace Dynamo.Wpf.Extensions
                     {
                         CertificateVerification.CheckAssemblyForValidCertificate(viewExtension.AssemblyPath);
                     }
-                    var assembly = Assembly.LoadFrom(viewExtension.AssemblyPath);
+                    var assembly = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(viewExtension.AssemblyPath);
                     var result = assembly.CreateInstance(viewExtension.TypeName) as IViewExtension;
                     ExtensionLoading?.Invoke(result);
 
@@ -131,7 +131,7 @@ namespace Dynamo.Wpf.Extensions
 
         /// <summary>
         /// A list of root directories which require extensions to have a signed entry point
-        /// File path locations from package definition xml's are validated against this collection 
+        /// File path locations from package definition xml's are validated against this collection
         /// </summary>
         internal List<string> DirectoriesToVerifyCertificates = new List<string>();
 

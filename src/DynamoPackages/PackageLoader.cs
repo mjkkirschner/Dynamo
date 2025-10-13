@@ -39,7 +39,7 @@ namespace Dynamo.PackageManager
 
         /// <summary>
         /// This event is raised when a package is first added to the list of packages this package loader is loading.
-        /// This event occurs before the package is fully loaded. 
+        /// This event occurs before the package is fully loaded.
         /// </summary>
         public event Action<Package> PackageAdded;
 
@@ -71,7 +71,7 @@ namespace Dynamo.PackageManager
         public IEnumerable<Package> LocalPackages { get { return localPackages; } }
 
         /// <summary>
-        /// Combines the extension with the root path and returns it if the path exists. 
+        /// Combines the extension with the root path and returns it if the path exists.
         /// If not, the root path is returned unchanged.
         /// </summary>
         /// <param name="root">root path to transform</param>
@@ -340,7 +340,7 @@ namespace Dynamo.PackageManager
         }
 
         /// <summary>
-        /// Loads and imports all packages. 
+        /// Loads and imports all packages.
         /// </summary>
         /// <param name="packages"></param>
         public void LoadPackages(IEnumerable<Package> packages)
@@ -361,7 +361,7 @@ namespace Dynamo.PackageManager
         /// <param name="newPaths">New package paths to load custom nodes and packages from.</param>
         /// <param name="preferences">Can be a temporary local preferences object.</param>
         /// <param name="customNodeManager"></param>
-        private void LoadCustomNodesAndPackagesHelper(IEnumerable<string> newPaths, IPreferences preferences, 
+        private void LoadCustomNodesAndPackagesHelper(IEnumerable<string> newPaths, IPreferences preferences,
             CustomNodeManager customNodeManager)
         {
             foreach (var path in preferences.CustomPackageFolders)
@@ -406,7 +406,7 @@ namespace Dynamo.PackageManager
         }
 
         /// <summary>
-        /// This method is used when custom nodes and packages need to be loaded from new package paths 
+        /// This method is used when custom nodes and packages need to be loaded from new package paths
         /// that have been added to preference settings.
         /// </summary>
         /// <param name="newPaths">New package paths to load custom nodes and packages from.</param>
@@ -432,11 +432,11 @@ namespace Dynamo.PackageManager
 
         /// <summary>
         /// LoadCustomNodesAndPackages can be used to load custom nodes and packages
-        /// from temporary paths that do not need to be added to preference settings. 
-        /// To load from temporary custom paths, initialize a local PreferenceSettings object 
-        /// and add the paths to its CustomPackageFolders property, then initialize a new 
+        /// from temporary paths that do not need to be added to preference settings.
+        /// To load from temporary custom paths, initialize a local PreferenceSettings object
+        /// and add the paths to its CustomPackageFolders property, then initialize a new
         /// LoadPackageParams with this preferences object and use as input to this method.
-        /// To load from custom paths that need to be persisted to the preferences, 
+        /// To load from custom paths that need to be persisted to the preferences,
         /// initialize a LoadPackageParams from an existing preferences object.
         /// </summary>
         /// <param name="loadPackageParams">LoadPackageParams initialized with local PreferenceSettings object containing custom package path.</param>
@@ -511,13 +511,13 @@ namespace Dynamo.PackageManager
                             // If the built-in package's package root dir was contained in the uninstall list in preferences,
                             // then we set it directly to Unloaded state.
                             pkg.LoadState.SetAsUnloaded();
-                        } 
+                        }
                         else
                         {
                             pkg.LoadState.SetScheduledForDeletion();
                         }
                     }
-                    
+
                 }
             }
             catch (UnauthorizedAccessException) { }
@@ -558,8 +558,8 @@ namespace Dynamo.PackageManager
 
                 var discoveredVersion = CheckAndGetPackageVersion(discoveredPackage.VersionName, discoveredPackage.Name, discoveredPackage.RootDirectory);
 
-                var existingPackage = LocalPackages.FirstOrDefault(package => 
-                                        (package.Name == discoveredPackage.Name) && 
+                var existingPackage = LocalPackages.FirstOrDefault(package =>
+                                        (package.Name == discoveredPackage.Name) &&
                                         (package.LoadState.State != PackageLoadState.StateTypes.Unloaded));
 
                 // Is this a new package?
@@ -587,8 +587,8 @@ namespace Dynamo.PackageManager
                         String.Format(Properties.Resources.DulicatedPackage,
                             discoveredPackage.Name,
                             discoveredPackage.RootDirectory));
-                } 
-                
+                }
+
                 // Is the existing version newer?
                 if (existingVersion > discoveredVersion)
                 {
@@ -682,7 +682,7 @@ namespace Dynamo.PackageManager
         }
 
         /// <summary>
-        ///     Attempt to load a managed assembly in to MetaDataLoad context. 
+        ///     Attempt to load a managed assembly in to MetaDataLoad context.
         /// </summary>
         /// <param name="rootDir">The root directory of the package</param>
         /// <param name="filename">The filename of a DLL</param>
@@ -698,7 +698,7 @@ namespace Dynamo.PackageManager
                 var mlcAssemblies = mlc.GetAssemblies();
                 assemName = mlcAssemblies.FirstOrDefault(x => x.GetName().Name.ToLower().Equals(Path.GetFileNameWithoutExtension(filename).ToLower()), null);
                 assem = mlc.LoadFromAssemblyPath(filename);
-                
+
                 var mlcAssemblies2 = mlc.GetAssemblies();
                 //if loading the assembly did not actually add a new assembly to the MLC
                 //then we've loaded it already, and our current behavior is to
@@ -735,7 +735,7 @@ namespace Dynamo.PackageManager
         }
 
         /// <summary>
-        ///     Attempt to load a managed assembly in to LoadFrom context. 
+        ///     Attempt to load a managed assembly in to LoadFrom context.
         /// </summary>
         /// <param name="filename">The filename of a DLL</param>
         /// <param name="assem">out Assembly - the passed value does not matter and will only be set if loading succeeds</param>
@@ -744,7 +744,7 @@ namespace Dynamo.PackageManager
         {
             try
             {
-                assem = Assembly.LoadFrom(filename);
+                assem = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(filename);
                 return true;
             }
             catch (FileLoadException e)
@@ -820,7 +820,7 @@ namespace Dynamo.PackageManager
                     // do not delete packages from the built in dir
                     continue;
                 }
-                
+
                 try
                 {
                     Directory.Delete(pkgNameDirTup, true);

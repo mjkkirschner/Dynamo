@@ -20,7 +20,7 @@ namespace Dynamo.Engine
         /// </summary>
         /// <param name="assemblyPath">Path of assembly for which LibraryCustomization
         /// object is to be obtained.</param>
-        /// <returns>Returns the corresponding LibraryCustomization object if one is 
+        /// <returns>Returns the corresponding LibraryCustomization object if one is
         /// found, or null otherwise.</returns>
         LibraryCustomization GetLibraryCustomization(string assemblyPath);
     }
@@ -37,7 +37,7 @@ namespace Dynamo.Engine
         /// <summary>
         /// Creates an instance of LibraryCustomizationServices given an IPathManager.
         /// </summary>
-        /// <param name="assemblyPathManager">Path manager through which assembly paths 
+        /// <param name="assemblyPathManager">Path manager through which assembly paths
         /// are to be resolved.</param>
         public LibraryCustomizationServices(IPathManager assemblyPathManager)
         {
@@ -50,11 +50,11 @@ namespace Dynamo.Engine
         /// </summary>
         /// <param name="assemblyPath">Path of assembly for which LibraryCustomization
         /// object is to be obtained.</param>
-        /// <returns>Returns the corresponding LibraryCustomization object if one is 
+        /// <returns>Returns the corresponding LibraryCustomization object if one is
         /// found, or null otherwise.</returns>
         public LibraryCustomization GetLibraryCustomization(string assemblyPath)
         {
-            return GetForAssembly(assemblyPath, pathManager, false); 
+            return GetForAssembly(assemblyPath, pathManager, false);
         }
 
         /// <summary>
@@ -63,11 +63,11 @@ namespace Dynamo.Engine
         /// </summary>
         /// <param name="assemblyPath">Path of assembly for which LibraryCustomization
         /// object is to be obtained.</param>
-        /// <param name="pathManager">Path manager through which assembly paths are 
+        /// <param name="pathManager">Path manager through which assembly paths are
         /// to be resolved.</param>
-        /// <param name="useAdditionalPaths">Set this parameter to true if additional 
+        /// <param name="useAdditionalPaths">Set this parameter to true if additional
         /// paths are to be considered when an assembly path is being resolved.</param>
-        /// <returns>Returns the corresponding LibraryCustomization object if one is 
+        /// <returns>Returns the corresponding LibraryCustomization object if one is
         /// found, or null otherwise.</returns>
         public static LibraryCustomization GetForAssembly(string assemblyPath, IPathManager pathManager, bool useAdditionalPaths = true)
         {
@@ -89,6 +89,8 @@ namespace Dynamo.Engine
 
             if (ResolveResourceAssembly(assemblyPath, pathManager, useAdditionalPaths, out resourceAssemblyPath))
             {
+                //TODO This actually is already isolated... docs say LoadFile now creates a new ALC.
+                // for now leaving it alone.
                 resAssembly = Assembly.LoadFile(resourceAssemblyPath);
             }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using Dynamo.Configuration;
 using Dynamo.Graph.Nodes;
 using Dynamo.Logging;
@@ -13,7 +14,7 @@ namespace Dynamo.Models
     /// <summary>
     ///     This class is responsible for loading types that derive
     ///     from NodeModel. For information about package loading see the
-    ///     PackageLoader. For information about loading other libraries, 
+    ///     PackageLoader. For information about loading other libraries,
     ///     see LibraryServices.
     /// </summary>
     public class NodeModelAssemblyLoader : LogSourceBase
@@ -80,7 +81,7 @@ namespace Dynamo.Models
         }
 
         #endregion
-        
+
         #region Methods
         /// <summary>
         /// Load all types which inherit from NodeModel whose assemblies are located in
@@ -91,7 +92,7 @@ namespace Dynamo.Models
         /// <param name="context"></param>
         /// <param name="modelTypes"></param>
         /// <param name="migrationTypes"></param>
-        internal void LoadNodeModelsAndMigrations(IEnumerable<string> nodeDirectories, 
+        internal void LoadNodeModelsAndMigrations(IEnumerable<string> nodeDirectories,
             string context, out List<TypeLoadData> modelTypes, out List<TypeLoadData> migrationTypes)
         {
             var loadedAssembliesByPath = new Dictionary<string, Assembly>();
@@ -99,7 +100,7 @@ namespace Dynamo.Models
 
             // cache the loaded assembly information
             foreach (
-                var assembly in 
+                var assembly in
                     AppDomain.CurrentDomain.GetAssemblies().Where(assembly => !assembly.IsDynamic))
             {
                 try
@@ -118,7 +119,7 @@ namespace Dynamo.Models
             // add the core assembly to get things like code block nodes and watches.
             //allDynamoAssemblyPaths.Add(Path.Combine(DynamoPathManager.Instance.MainExecPath, "DynamoCore.dll"));
 
-            ResolveEventHandler resolver = 
+            ResolveEventHandler resolver =
                 (sender, args) =>
                 {
                     Assembly resolvedAssembly;
@@ -150,13 +151,13 @@ namespace Dynamo.Models
                     Assembly assembly;
                     if (!loadedAssembliesByPath.TryGetValue(assemblyPath, out assembly))
                     {
-                        assembly = Assembly.LoadFrom(assemblyPath);
+                        assembly = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(assemblyPath);
                         loadedAssembliesByName[assembly.GetName().Name] = assembly;
                         loadedAssembliesByPath[assemblyPath] = assembly;
                     }
 
                     LoadNodesFromAssembly(assembly, context, result, result2);
-                    
+
                 }
                 catch (BadImageFormatException)
                 {
@@ -222,16 +223,16 @@ namespace Dynamo.Models
                 }
             }
             catch
-            {   
+            {
                 return output;
             }
-           
+
             return output;
         }
 
         /// <summary>
         ///     Enumerate the types in an assembly and add them to DynamoController's
-        ///     dictionaries and the search view model.  Internally catches exceptions and sends the error 
+        ///     dictionaries and the search view model.  Internally catches exceptions and sends the error
         ///     to the console.
         /// </summary>
         /// <Returns>The list of node types loaded from this assembly</Returns>
@@ -272,7 +273,7 @@ namespace Dynamo.Models
                     //and have the elementname attribute
                     if (IsNodeSubType(t))
                     {
-                        //if we are running in revit (or any context other than NONE) use the DoNotLoadOnPlatforms attribute, 
+                        //if we are running in revit (or any context other than NONE) use the DoNotLoadOnPlatforms attribute,
                         //if available, to discern whether we should load this type
                         if (context.Equals(Context.NONE)
                             || !t.GetCustomAttributes<DoNotLoadOnPlatformsAttribute>(false)
@@ -290,7 +291,7 @@ namespace Dynamo.Models
                 }
                 catch (Exception e)
                 {
-                    Log(String.Format(Properties.Resources.FailedToLoadType, assembly.FullName, t.FullName));                  
+                    Log(String.Format(Properties.Resources.FailedToLoadType, assembly.FullName, t.FullName));
                     Log(e);
                 }
             }

@@ -43,10 +43,12 @@ namespace ProtoFFI
                     //https://github.com/dotnet/runtime/issues/89215
                     if (name.ToLower().Contains("system.private.corelib"))
                     {
+                        //TODO unclear what the right fix is here...
+                        //We can't load this assembly into our ALC so this is probably still fine.
                         return Assembly.Load(System.IO.Path.GetFileNameWithoutExtension(name));
                     }
 
-                    return Assembly.LoadFrom(name);
+                    return LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(name);
                 }
                 catch(System.IO.FileLoadException e)
                 {
@@ -116,7 +118,7 @@ namespace ProtoFFI
         {
             RuntimeCore runtimeCore = sender as RuntimeCore;
             FFIExecutionSession session = GetSession(runtimeCore, false);
-            //If there wasn't any session created, there was no extension app 
+            //If there wasn't any session created, there was no extension app
             //registered for the session
             if (null == session)
                 return;
@@ -124,7 +126,7 @@ namespace ProtoFFI
             session.State = e.ExecutionState;
             mApploader.Notify(session);
         }
-        
+
     }
 
     class FFIExecutionSession : IExecutionSession, IConfiguration, IDisposable

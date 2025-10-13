@@ -407,7 +407,7 @@ namespace DynamoUnits
 
         /// <summary>
         /// Adds ASC (Autodesk Shared Components) schema paths to the candidate directories list.
-        /// 
+        ///
         /// We use 'AscSdkWrapper' directly here because 'InstalledAscLookUp' is overkill -- it's got
         /// extra logic we don't need. 'AscSdkWrapper' gives us just the version/path info for ASC
         /// installs, which is all we care about for schema discovery. This also decouples us from
@@ -428,8 +428,9 @@ namespace DynamoUnits
                 // Use reflection to dynamically load DynamoInstallDetective at runtime.
                 // This avoids the need for a direct project reference and InternalsVisibleTo,
                 // maintaining cross-platform compatibility for the DynamoUnits library.
-                var dynamoInstallDetectiveAssembly = Assembly.LoadFrom(
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
+                //TODO fix ref.
+                var dynamoInstallDetectiveAssembly = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(
+                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     "DynamoInstallDetective.dll"));
 
                 var ascWrapperType = dynamoInstallDetectiveAssembly.GetType("DynamoInstallDetective.AscSdkWrapper");
@@ -439,7 +440,7 @@ namespace DynamoUnits
                 }
 
                 // Get major versions using reflection: AscSdkWrapper.GetMajorVersions()
-                var getMajorVersionsMethod = ascWrapperType.GetMethod("GetMajorVersions", 
+                var getMajorVersionsMethod = ascWrapperType.GetMethod("GetMajorVersions",
                     BindingFlags.Public | BindingFlags.Static);
                 var majorVersions = (string[])getMajorVersionsMethod?.Invoke(null, null);
 

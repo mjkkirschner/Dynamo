@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace Dynamo.Utilities
 {
@@ -24,8 +26,8 @@ namespace Dynamo.Utilities
         /// <summary>
         /// Handler to the ApplicationDomain's AssemblyResolve event.
         /// If an assembly's location cannot be resolved, an exception is
-        /// thrown. Failure to resolve an assembly will leave Dynamo in 
-        /// a bad state, so we should throw an exception here which gets caught 
+        /// thrown. Failure to resolve an assembly will leave Dynamo in
+        /// a bad state, so we should throw an exception here which gets caught
         /// by our unhandled exception handler and presents the crash dialogue.
         /// </summary>
         /// <param name="sender"></param>
@@ -50,7 +52,10 @@ namespace Dynamo.Utilities
                         Console.WriteLine("loading from " + assemblyPath);
 
                     }
-                    return Assembly.LoadFrom(assemblyPath);
+                    //TODO maybe loadcontextUtils should go in DynamoServices... or utils.
+                    //TODO somehow we need be able to find where DynamoCore ALC is loaded...
+                    //a name would be useful... or we might need to create a new project with 0 deps just for this purpose?
+                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
                 }
 
                 // Then check all additional resolution paths

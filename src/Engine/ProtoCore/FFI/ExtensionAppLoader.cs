@@ -88,7 +88,7 @@ namespace ProtoFFI
                 if (null != app)
                 {
                     app.ShutDown();
-                }  
+                }
             }
             mExtensionApps.Clear();
             mAssemblies.Clear();
@@ -108,7 +108,9 @@ namespace ProtoFFI
                 //load from search path, if file exists
                 string filepath = ProtoCore.Utils.FileUtils.GetDSFullPathName(shortname + ".dll");
                 if (File.Exists(filepath))
-                    return Assembly.LoadFrom(filepath);
+                {   //TODO fix ref.
+                    return LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(filepath);
+                }
             }
             catch (Exception)
             {
@@ -172,6 +174,6 @@ namespace ProtoFFI
                 extensionApp.StartUp(new ExtensionStartupParams { DisableADP = Analytics.DisableAnalytics });
             }
         }
-        
+
     }
 }

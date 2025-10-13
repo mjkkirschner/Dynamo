@@ -137,11 +137,11 @@ namespace Dynamo.Wpf.Utilities
                     if (!File.Exists(assemblyPath))
                         throw new FileNotFoundException(assemblyPath);
 
-                    var assembly = Assembly.LoadFrom(assemblyPath);
+                    var assembly = LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(assemblyPath);
                     type = assembly.GetType("DynamoInstallDetective.Utilities");
                 }
 
-                var installationsMethod = type.GetMethod(   
+                var installationsMethod = type.GetMethod(
                     "FindMultipleProductInstallations",
                     BindingFlags.Public | BindingFlags.Static);
 
@@ -298,7 +298,7 @@ namespace Dynamo.Wpf.Utilities
 
                 var upiConfigFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "upiconfig.xml");
 
-                using (var cerDLL = new CerDLL(cerToolPath)) 
+                using (var cerDLL = new CerDLL(cerToolPath))
                 {
                     cerDLL.ToggleCER(true);
                     cerDLL.RegisterUPI(upiConfigFilePath);
@@ -320,7 +320,7 @@ namespace Dynamo.Wpf.Utilities
                         ? $"Successfully sent CER error report"
                         : $"Failed to send CER error report");
                 }
-                
+
                 return true;
             }
             catch(Exception ex)

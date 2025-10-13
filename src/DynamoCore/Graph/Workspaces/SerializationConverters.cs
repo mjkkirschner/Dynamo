@@ -126,29 +126,31 @@ namespace Dynamo.Graph.Workspaces
 
             try
             {
-               type = Type.GetType(obj["$type"].Value<string>());
-               typeName = obj["$type"].Value<string>().Split(',').FirstOrDefault();
-                
+                type = Type.GetType(obj["$type"].Value<string>());
+                typeName = obj["$type"].Value<string>().Split(',').FirstOrDefault();
+
                 if (typeName.Equals("Dynamo.Graph.Nodes.ZeroTouch.DSFunction"))
                 {
                     // If it is a zero touch node, then get the whole function name including the namespace.
                     functionName = obj["FunctionSignature"].Value<string>().Split('@').FirstOrDefault().Trim();
                 }
-                // we get the assembly name from the type string for the node model nodes. 
+                // we get the assembly name from the type string for the node model nodes.
                 else
                 {
                     assemblyName = obj["$type"].Value<string>().Split(',').Skip(1).FirstOrDefault().Trim();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 nodeFactory?.AsLogger().Log(e);
             }
             // If we can't find this type - try to look in our load from assemblies,
             // but only during testing - this is required during testing because some dlls are loaded
-            // using Assembly.LoadFrom using the assemblyHelper - which loads dlls into loadFrom context - 
+            // using Assembly.LoadFrom using the assemblyHelper - which loads dlls into loadFrom context -
             // dlls loaded with LoadFrom context cannot be found using Type.GetType() - this should
             // not be an issue during normal dynamo use but if it is we can enable this code.
+
+            //TODO this should not be required anymore - LoadFromContext no longer exists in dotnet.
             if(type == null && this.isTestMode == true)
             {
                 List<Assembly> resultList;
@@ -182,9 +184,9 @@ namespace Dynamo.Graph.Workspaces
 
             // If the id is not a guid, makes a guid based on the id of the node
             var guid = GuidUtility.tryParseOrCreateGuid(obj["Id"].Value<string>());
-            
+
             var replication = obj["Replication"].Value<string>();
-           
+
             var inPorts = obj["Inputs"].ToArray().Select(t => t.ToObject<PortModel>()).ToArray();
             var outPorts = obj["Outputs"].ToArray().Select(t => t.ToObject<PortModel>()).ToArray();
 
@@ -205,7 +207,7 @@ namespace Dynamo.Graph.Workspaces
 
                 CustomNodeDefinition def = null;
                 CustomNodeInfo info = null;
-                // Skip deserializing the Description Json property as the original one in dyf may 
+                // Skip deserializing the Description Json property as the original one in dyf may
                 // already be updated without syncing with the dyn
                 bool isUnresolved = !manager.TryGetCustomNodeData(functionId, null, false, out def, out info);
                 Function function = manager.CreateCustomNodeInstance(functionId, null, false, def, info);
@@ -276,7 +278,7 @@ namespace Dynamo.Graph.Workspaces
             else
             {
                 node = (NodeModel)obj.ToObject(type);
-                
+
                 // We don't need to remap ports for any nodes with json constructors which pass ports
                 remapPorts = false;
             }
@@ -285,7 +287,7 @@ namespace Dynamo.Graph.Workspaces
             {
                 RemapPorts(node, inPorts, outPorts, resolver, manager.AsLogger());
             }
-               
+
 
             // Cannot set Lacing directly as property is protected
             node.UpdateValue(new UpdateValueParams("ArgumentLacing", replication));
@@ -300,7 +302,7 @@ namespace Dynamo.Graph.Workspaces
 
             foreach (var p in node.OutPorts)
                 serializer.ReferenceResolver.AddReference(serializer.Context, p.GUID.ToString(), p);
-            
+
             return node;
         }
 
@@ -336,7 +338,7 @@ namespace Dynamo.Graph.Workspaces
 
         /// <summary>
         /// Map old Guids to new Models in the IdReferenceResolver.
-        /// This method also sets portData from the deserialized ports onto the 
+        /// This method also sets portData from the deserialized ports onto the
         /// newly created ports.
         /// </summary>
         /// <param name="node">The newly created node.</param>
@@ -364,7 +366,7 @@ namespace Dynamo.Graph.Workspaces
                             );
                     }
                 }
-              
+
             }
             foreach (var p in node.OutPorts)
             {
@@ -431,13 +433,13 @@ namespace Dynamo.Graph.Workspaces
 
         /// When deserializing, we do not want to read this property from the file
         /// so null is being returned. This is to convert the Description property
-        /// to the localized language. 
+        /// to the localized language.
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             return null;
         }
 
-        /// Serializing the description property. 
+        /// Serializing the description property.
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             serializer.Serialize(writer, value);
@@ -447,7 +449,7 @@ namespace Dynamo.Graph.Workspaces
     /// <summary>
     /// The WorkspaceConverter is used to serialize and deserialize WorkspaceModels.
     /// Construction of a WorkspaceModel requires things like an EngineController,
-    /// a NodeFactory, and a Scheduler. These must be supplied at the time of 
+    /// a NodeFactory, and a Scheduler. These must be supplied at the time of
     /// construction and should not be serialized.
     /// </summary>
     public class WorkspaceReadConverter : JsonConverter
@@ -463,7 +465,7 @@ namespace Dynamo.Graph.Workspaces
         internal const string EXTENSION_WORKSPACE_DATA = "ExtensionWorkspaceData";
         internal const string LINTING_PROP_STRING = "Linting";
 
-        public WorkspaceReadConverter(EngineController engine, 
+        public WorkspaceReadConverter(EngineController engine,
             DynamoScheduler scheduler, NodeFactory factory, bool isTestMode, bool verboseLogging)
         {
             this.scheduler = scheduler;
@@ -474,7 +476,7 @@ namespace Dynamo.Graph.Workspaces
         }
 
         public WorkspaceReadConverter(EngineController engine,
-            DynamoScheduler scheduler, NodeFactory factory, bool isTestMode, bool verboseLogging, LinterManager linterManager) : 
+            DynamoScheduler scheduler, NodeFactory factory, bool isTestMode, bool verboseLogging, LinterManager linterManager) :
             this(engine, scheduler, factory, isTestMode, verboseLogging)
         {
             this.linterManager = linterManager;
@@ -551,7 +553,7 @@ namespace Dynamo.Graph.Workspaces
                     }
                 }
             }
-          
+
 
             #region Setting Inputs based on view layer info
             // TODO: It is currently duplicating the effort with Input Block parsing which should be cleaned up once
@@ -619,7 +621,7 @@ namespace Dynamo.Graph.Workspaces
                 workspaceReferences = new List<INodeLibraryDependencyInfo>();
             }
 
-            foreach(INodeLibraryDependencyInfo depInfo in workspaceReferences) 
+            foreach(INodeLibraryDependencyInfo depInfo in workspaceReferences)
             {
                 if (depInfo is PackageDependencyInfo)
                 {
@@ -737,9 +739,9 @@ namespace Dynamo.Graph.Workspaces
             ws.ExternalFiles = externalFiles;
             if (obj.TryGetValue(nameof(WorkspaceModel.Author), StringComparison.OrdinalIgnoreCase, out JToken author))
                 ws.Author = author.ToString();
-            
+
             ws.ContainsLegacyTraceData = containsLegacyTraceData;
-            
+
             return ws;
         }
 
@@ -847,7 +849,7 @@ namespace Dynamo.Graph.Workspaces
             // Element resolver
             writer.WritePropertyName("ElementResolver");
             serializer.Serialize(writer, ws.ElementResolver);
-            
+
             // Inputs
             writer.WritePropertyName("Inputs");
             // Find nodes which are inputs and get their inputData if its not null.
@@ -889,7 +891,7 @@ namespace Dynamo.Graph.Workspaces
 
             IEnumerable<INodeLibraryDependencyInfo> referencesList = ws.NodeLibraryDependencies;
             referencesList = referencesList.Concat(ws.NodeLocalDefinitions).Concat(ws.ExternalFiles);
-            foreach (INodeLibraryDependencyInfo item in referencesList) 
+            foreach (INodeLibraryDependencyInfo item in referencesList)
             {
                 string refName = string.Empty;
                 string refExtension = System.IO.Path.GetExtension(item.Name);
@@ -905,7 +907,7 @@ namespace Dynamo.Graph.Workspaces
                     refName = refExtension;
                     refType = Actions.LocalReferences;
                 }
-                else 
+                else
                 {
                     refName = refExtension;
                 }
@@ -955,7 +957,7 @@ namespace Dynamo.Graph.Workspaces
                 // a DSVarArgFunction or a CodeBlockNodeModel into a list.
                 var nodeGuids =
                     ws.Nodes.Where(
-                            n => n is DSFunction || n is DSVarArgFunction || n is CodeBlockNodeModel || n is Function || 
+                            n => n is DSFunction || n is DSVarArgFunction || n is CodeBlockNodeModel || n is Function ||
                             n.GetType().GetCustomAttributes(typeof(DynamoServices.RegisterForTraceAttribute),false).Any() )
                         .Select(n => n.GUID);
 
@@ -1235,14 +1237,14 @@ namespace Dynamo.Graph.Workspaces
     /// <summary>
     /// The ConnectorConverter is used to serialize and deserialize ConnectorModels.
     /// The Start and End of a ConnectorModel are references to PortModels, but
-    /// we want the serialized representation of a Connector to reference these 
+    /// we want the serialized representation of a Connector to reference these
     /// ports by Id. This converter resolves the reference to the correct NodeModel
     /// instance by id, and constructs the ConnectorModel.
     /// </summary>
     public class ConnectorConverter : JsonConverter
     {
         private Logging.ILogger logger;
-        
+
         /// <summary>
         /// Constructs a ConnectorConverter.
         /// </summary>
@@ -1304,7 +1306,7 @@ namespace Dynamo.Graph.Workspaces
                        Logging.WarningLevel.Moderate);
 
                 }
-                
+
                 return null;
             }
         }

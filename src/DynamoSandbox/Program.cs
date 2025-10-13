@@ -13,7 +13,7 @@ namespace DynamoSandbox
 
         [STAThread]
         public static void Main(string[] args)
-        {   
+        {
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
 
             //Display a message box and exit the program if Dynamo Core is unresolved.
@@ -30,8 +30,8 @@ namespace DynamoSandbox
         /// <summary>
         /// Handler to the ApplicationDomain's AssemblyResolve event.
         /// If an assembly's location cannot be resolved, an exception is
-        /// thrown. Failure to resolve an assembly will leave Dynamo in 
-        /// a bad state, so we should throw an exception here which gets caught 
+        /// thrown. Failure to resolve an assembly will leave Dynamo in
+        /// a bad state, so we should throw an exception here which gets caught
         /// by our unhandled exception handler and presents the crash dialogue.
         /// </summary>
         /// <param name="sender"></param>
@@ -45,13 +45,13 @@ namespace DynamoSandbox
             {
                 string assemblyPath = Path.Combine(DynamoCorePath, assemblyName);
                 if (File.Exists(assemblyPath))
-                    return Assembly.LoadFrom(assemblyPath);
+                    return LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(assemblyPath);
 
                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
 
                 assemblyPath = Path.Combine(assemblyDirectory, assemblyName);
-                return (File.Exists(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : null);
+                return File.Exists(assemblyPath) ? LoadContextUtils.GetDynamoCoreLoadContext().LoadFromAssemblyPath(assemblyPath) : null;
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace DynamoSandbox
                 return dynamopath;
             }
         }
-        
+
         /// <summary>
         /// Finds the Dynamo Core path by looking into registery or potentially a config file.
         /// </summary>
@@ -111,7 +111,7 @@ namespace DynamoSandbox
                         EnvironmentVariableTarget.Process) + ";" + DynamoCorePath;
             Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
         }
-        
+
         /// <summary>
         /// If Dynamo Sandbox fails to acquire Dynamo Core path, show a dialog that
         /// redirects to download DynamoCore.msi, and the program should exit.
