@@ -1,10 +1,10 @@
 # PowerShell script to build DynamoCore.sln in Debug, invoke BuildPackages.bat, and push the resulting nupkg to a local NuGet repo
 
 param(
-    [string]$SolutionPath = "..\..\..\src\DynamoCore.sln",
-    [string]$NugetScriptDir = "..\",
+    [string]$SolutionPath = "$PSScriptRoot\..\..\..\src\DynamoCore.sln",
+    [string]$NugetScriptDir = "$PSScriptRoot\..\",
     [string]$NuspecTemplate = "template-service-core",
-    [string]$DebugBinPath = "..\..\..\bin\Publish_Linux\Debug",
+    [string]$DebugBinPath = "$PSScriptRoot\..\..\..\bin\Publish_Linux\Debug",
     [string]$LocalNugetRepo = "C:\nuget_local"
 )
 
@@ -25,7 +25,7 @@ Pop-Location
 
 # 1. Build DynamoCore.sln in Debug for Publish_Linux platform using dotnet, overriding DotNet to net8.0-browser
 Write-Host "Building DynamoCore.sln in Debug mode for Publish_Linux platform using dotnet (DotNet=net8.0-browser)..."
-$solutionPath = Join-Path $PSScriptRoot '..\..\..\src\DynamoCore.sln'
+$solutionPath = Join-Path $workspaceRoot 'src\DynamoCore.sln'
 dotnet build $solutionPath --configuration Debug -p:Platform=Publish_Linux -p:DotNet=net8.0-browser
 if ($LASTEXITCODE -ne 0) {
     Write-Error "dotnet build failed. Exiting."
@@ -33,7 +33,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Ensure DynamoCore.dll exists in the expected output directory for version extraction
-$dllPath = Join-Path $PSScriptRoot '..\..\..\bin\Publish_Linux\Debug\DynamoCore.dll'
+$dllPath = Join-Path $DebugBinPath 'DynamoCore.dll'
 if (!(Test-Path $dllPath)) {
     Write-Error "DynamoCore.dll not found at $dllPath. Packaging will fail."
     exit 1
@@ -44,7 +44,7 @@ Write-Host "Invoking BuildPackages.bat..."
 # Convert DebugBinPath to absolute path
 $absoluteDebugBinPath = Resolve-Path $DebugBinPath | Select-Object -ExpandProperty Path
 Push-Location $NugetScriptDir
-cmd /c ".\BuildPackages.bat $NuspecTemplate $absoluteDebugBinPath"
+cmd /c "$NugetScriptDir\BuildPackages.bat $NuspecTemplate $absoluteDebugBinPath"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "BuildPackages.bat failed. Exiting."
     Pop-Location
@@ -62,8 +62,12 @@ if (-not $nupkg) {
 }
 
 # Use NuGet.exe from the repo (one directory up from scripts)
-$nugetExePath = Join-Path $PSScriptRoot '..\NuGet.exe'
+$nugetExePath = Join-Path $NugetScriptDir 'NuGet.exe'
 Write-Host "Pushing $($nupkg.Name) to local NuGet repo at $LocalNugetRepo using $nugetExePath..."
+if (!(Test-Path $LocalNugetRepo)) {
+    Write-Host "Creating local NuGet repo at $LocalNugetRepo..."
+    New-Item -ItemType Directory -Path $LocalNugetRepo -Force | Out-Null
+}
 & $nugetExePath push $nupkg.FullName -Source $LocalNugetRepo
 if ($LASTEXITCODE -ne 0) {
     Write-Error "NuGet push failed. Exiting."
